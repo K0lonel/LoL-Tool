@@ -7,6 +7,11 @@ if !A_IsAdmin && !%False%
         ExitApp
 }
 
+for n, param in A_Args
+{
+    MsgBox Parameter number %n% is %param%.
+}
+
 if !ProcessExist("RiotClientServices.exe")
     goto isLeague
 else
@@ -31,6 +36,17 @@ Menu, Tray, Add
 global req := ComObjCreate("WinHttp.WinHttpRequest.5.1")
 global Enabled := ComObjError(false)
 staticData := "https://127.0.0.1:2999/liveclientdata/allgamedata"
+eventData  := "https://127.0.0.1:2999/liveclientdata/eventdata"
+statsData  := "https://127.0.0.1:2999/liveclientdata/gamestats"
+path := detectRG()
+global timeDic := {"a" : 0, "b" : 0, "c" : 0, "d" : 0, "e" : 0, "f" : 0, "g" : 0, "h" : 0}
+inhibList := ["Barracks_T1_L1"
+            , "Barracks_T1_C1"
+            , "Barracks_T1_R1"
+            , "Barracks_T2_L1"
+            , "Barracks_T2_C1"
+            , "Barracks_T2_R1"]
+firstTime := 1
 buttonOn := !buttonOn
 assetsInDir := ["level4", "level5", "level6", "level7", "chest", "ownedChest"]
 localPlayer := {"summonerName": "localName", "summonerID": 0}
@@ -39,10 +55,21 @@ arrayAscii := {}
 champNameId := {}
 buttonState := {"ON": "Bench ✔️", "OFF": "Bench ❌"}
 assetsDisplay := "Loading Assets"
-recountModule := "                       RECOUNT - DAMAGE                           "
-buffs := {"elder": 150, "baron": 180}
+recountModule := "                 RECOUNT - DAMAGE                 "
+buffs := {"elder": 150, "baron": 180, "inhiSR": 300, "inhiARAM": 250}
 tftCreate = {"queueId": 1110}
 lobCreate = {"customGameLobby": {"configuration": {"gameMode": "PRACTICETOOL", "gameTypeConfig": {"id": 1}, "mapId": 11, "teamSize": 5}, "lobbyName": "W E L L"}, "isCustom": true}
+loop 8
+    toggle%A_Index% := 1
+
+; global minimapElement1
+; global minimapElement2
+; global minimapElement3
+; global minimapElement4
+; global minimapElement5
+; global minimapElement6
+; global minimapElement7
+; global minimapElement8
 
 FileRead, vText, ascii.txt
 Loop, Parse, vText, `n, `r
@@ -66,6 +93,10 @@ for k in arrayAscii
 
 Menu, Submenu3, Add, TFT Test, tft
 Menu, Submenu3, Add, Info, lobInfo
+
+if (Admin == True)
+    Menu, tray, Add, Zoomies, zoomies
+
 Menu, tray, Add, Ascii, :Submenu1
 Menu, tray, Disable, Ascii
 Menu, tray, Add, LobbyTools, :Submenu3

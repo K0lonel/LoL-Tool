@@ -1,6 +1,7 @@
 ﻿#NoEnv
 #SingleInstance, Force
 #Persistent
+SetBatchLines -1
 SendMode Input
 CoordMode Screen
 CoordMode Mouse, Relative
@@ -8,6 +9,7 @@ SetWorkingDir %A_ScriptDir%
 FileEncoding UTF-8
 
 #include, <JSON>
+#Include, <JSONFile>
 #include, initialize.ahk
 #include, endpoints.ahk
 
@@ -178,121 +180,71 @@ else
     goto recheckingConv
 }
 
-    if inGame = 1
+if inGame = 1
+{
+    SetTimer, checkGameState, off
+    gameCombined := {}
+    loop
     {
-        SetTimer, checkGameState, off
-        gameCombined := {}
-        friendsIngame := []
-
-        loop
+        APICall("GET", staticData)
+        sleep 500
+        if httpstatus = 200
         {
-            APICall("GET", staticData)
-            sleep 500
-            if httpstatus = 200
-            {
-                sleep 2000
-                notUpdateGame := APICall("GET", staticData)
-                break
-            }
+            sleep 2000
+            notUpdateGame := APICall("GET", staticData)
+            break
         }
-
-        for k,v in notUpdateGame.allPlayers
-            gameCombined[v.summonerName] := v.championName
-
-        SetTimer, refreshData, 1000
-        Gui timer:Color, 1a1a1a
-        Gui timer:Font, s10 cDCDDD8, Arial Black
-        Gui timer:+LastFound +AlwaysOnTop +ToolWindow
-        WinSet, TransColor, 1a1a1a
-        Gui timer:-Caption
-        Gui timer:Add, Text, y+20 vT2 w70 BackgroundTrans,
-
-        if % notUpdateGame.gameData.mapName == "Map11"
-        {
-            respawnTimer := 300
-            Gui timer:Add, Text, yp-20 vT1 w80 BackgroundTrans,
-            Gui timer:Add, Text, yp+40 vT3 w80 BackgroundTrans,
-            Gui timer:Add, Text, yp+20 vElderBuff w80 BackgroundTrans,
-            Gui timer: Add, Text, yp+20 vBaronBuff w90 BackgroundTrans,
-            map := "Map11"
-        }
-        Else
-        {
-            map := "notSr"
-            respawnTimer := 250
-        }
-        Gui timer: Show, NA x0 y120 w100 h100
-        for k, v in notUpdateGame.allPlayers
-            if % v.summonerName == localPlayer.summonerName
-                ownerTeam := v.team
-        if % ownerTeam == "ORDER"
-            inhiDisplay := "Barracks_T2"
-        else
-            inhiDisplay := "Barracks_T1"
-        conversations := APICall("GET", conver)
-        for kConver, vConver in conversations
-            for kFriendName, vFriendName in gameCombined
-                if % vConver.gameName == kFriendName
-                    friendsIngame.Push(vConver.id)
-        loop
-        {
-            sleep 1000
-            for k,v in currentGame.events.Events
-            {
-                if % (v.EventName == "InhibKilled")
-                    if % currentGame.gameData.gameTime <= v.EventTime + respawnTimer
-                    {
-                        laneInhi := v.InhibKilled
-                        if % laneInhi == inhiDisplay . "_C1"
-                        {
-                            midTimer := "Mid " floor(v.EventTime + respawnTimer - currentGame.gameData.gameTime) "s"
-                            GuiControl, timer:, T2, % midTimer
-                        }
-                        if % currentGame.gameData.mapName == "Map11"
-                        {
-                            if % laneInhi == inhiDisplay . "_L1"
-                            {
-                                topTimer := "Top " floor(v.EventTime + respawnTimer - currentGame.gameData.gameTime) "s"
-                                GuiControl, timer:, T1, % topTimer
-                            }
-                            if % laneInhi == inhiDisplay . "_R1"
-                            {
-                                botTimer := "Bot " floor(v.EventTime + respawnTimer - currentGame.gameData.gameTime) "s"
-                                GuiControl, timer:, T3, % botTimer
-                            }
-                        }
-                    }
-                if % (v.DragonType == "Elder")
-                    if % currentGame.gameData.gameTime <= v.EventTime + buffs.elder
-                    {
-                        elderBuffTimer := "Elder " floor(v.EventTime + buffs.elder - currentGame.gameData.gameTime) "s"
-                        GuiControl, timer:, ElderBuff, % elderBuffTimer
-                    }
-                if % (v.EventName == "BaronKill")
-                    if % currentGame.gameData.gameTime <= v.EventTime + buffs.baron
-                    {
-                        baronBuffTimer := "Baron " floor(v.EventTime + buffs.baron - currentGame.gameData.gameTime) "s"
-                        GuiControl, timer:, BaronBuff, % baronBuffTimer
-                    }
-            }
-            if httpstatus =
-            {
-                SetTimer, refreshData, off
-                Gui timer: Destroy
-                midTimer := ""
-                topTimer := ""
-                topTimer := ""
-                elderBuffTimer := ""
-                baronBuffTimer := ""
-                inGame := 0
-                endOfGame := 0
-                champSelect := 0
-                break
-            }
-        }
-        SetTimer, checkGameState, 500
     }
-    return
+    for k,v in notUpdateGame.allPlayers
+        gameCombined[v.summonerName] := v.championName
+
+    SetTimer, refresher, 3000
+    SetTimer, oneSec, 1000
+
+    WinGetPos,,, W, H, ahk_exe League of Legends.exe
+    Gui timer:Color, 1a1a1a
+    Gui timer:Font, s10 cLime, Arial Black
+    Gui timer:+LastFound +AlwaysOnTop +ToolWindow +Disabled
+    WinSet, TransColor, 1a1a1a
+    Gui timer:-Caption
+    Gui timer:Margin, 0, 0
+
+    loop 8
+        Gui timer:Add, Text, xm ym w30 center section BackgroundTrans vminimapElement%A_Index%, 
+    
+    if % notUpdateGame.gameData.mapName == "Map11"
+    {
+        respawnTimer := 300
+        map := "Map11"
+    }
+    Else
+    {
+        respawnTimer := 250
+        map := "notSr"
+    }
+
+    loop
+    {
+        sleep 3000
+        if httpstatus =
+        {
+            SetTimer, refresher, off
+            SetTimer, oneSec, off
+            Gui timer: Destroy
+
+            loop 8
+                toggle%A_Index% := 1
+
+            firstTime := 1
+            inGame := 0
+            endOfGame := 0
+            champSelect := 0
+            break
+        }
+    }
+    SetTimer, checkGameState, 500
+}
+return
 
 
 
@@ -340,24 +292,12 @@ asciiLines:
     APICall("POST", msgs, requestBodyLOL)
 return
 
-$F8::
-    for kFriendsInGame, vFriendsInGame in friendsIngame
-    {
-        msgss := URL . "/lol-chat/v1/conversations/" . vFriendsInGame . "/messages"
-        if % map == "Map11"
-            dataFriends = {"body": "\n %topTimer% \n %midTimer% \n %botTimer% \n %elderBuffTimer% \n %baronBuffTimer%","type": "chat"}
-        else
-            dataFriends = {"body": "\n %midTimer%","type": "chat"}
-        APICall("POST", msgss, dataFriends)
-    }
-return
-
 $F9::
-    if % (actualState == "Lobby" || actualState == "Matchmaking")
+    if % (actualState == "Lobby" || actualState == "Matchmaking" || actualState == "CheckedIntoTournament")
     {
         conversation := APICall("GET", conver)
         convNr := conversation[conversation.Length()]
-        if % convNr.type == "customGame"
+        if % (convNr.type == "customGame" || convNr.type == "clash")
             msgs := URL . "/lol-chat/v1/conversations/" . convNr.id . "/messages"
     }
     APICall("POST", msgs, displayDPS(recountModule, "chat"))
@@ -383,10 +323,14 @@ builds:
             lowered := StrReplace(lowered, ".", "")
             lowered := StrReplace(lowered, "'", "")
             lowered := StrReplace(lowered, A_Space, "")
+            lowered := StrReplace(lowered, "glasc", "")
+            lowered := StrReplace(lowered, "&willump", "")
+            ; lowered := RegexReplace(x, "\.|'|&|willump|glasc")
             run % "https://lolalytics.com/lol/" . lowered . "/build/"
         }
 return
 
+$F8::
 lootManage:
     APICall("POST", refreshLoot)
     deChampID := {}
@@ -532,7 +476,7 @@ ShuffleChamps:
     SetTimer, refreshCS, off
     loop 3
         for kbenchChampionIds, vbenchChampionIds in benchCALL.benchChampionIds
-        APICall("POST", swapBench . vbenchChampionIds)
+            APICall("POST", swapBench . vbenchChampionIds)
     SetTimer, refreshCS, 100
 return
 
@@ -554,6 +498,101 @@ spellPicker:
         sleep 100
         tooltip,
     }
+return
+
+refresher:
+liveEvents := APICall("GET", eventData)
+liveStats  := APICall("GET", statsData)
+
+jf := new JSONFile(path)
+for k, v in jf.Object().files[1].sections
+    if (v.name == "HUD")
+        for k, v in v.settings
+            if (v.name == "MinimapScale")
+                mapScale := v.value
+
+wh := 155 + mapScale*51.66
+scaleM := -200 - 101*mapScale*0.66
+
+if (oldMapScale != mapScale) || firstTime
+{
+    oldMapScale := mapScale
+    if firstTime
+        firstTime := ""
+    minimapElementPOS:= {"1drake"   : "x" wh/1.63 "y" wh/1.5
+                        ,"2baron"   : "x" wh/3.5  "y" wh/3.8
+                        ,"3b_Tinhi" : "x" wh/30   "y" wh/1.37
+                        ,"4b_Minhi" : "x" wh/6.1  "y" wh/1.33
+                        ,"5b_Binhi" : "x" wh/5.4  "y" wh/1.13
+                        ,"6r_Tinhi" : "x" wh/1.43 "y" wh/20
+                        ,"7r_Minhi" : "x" wh/1.37 "y" wh/5.6
+                        ,"8r_Binhi" : "x" wh/1.16 "y" wh/5}
+
+    Gui timer:Show, % "x" W + scaleM "y" H + scaleM "w" wh "h" wh "NoActivate", minimapCover
+
+    for monster, xy in minimapElementPOS
+        GuiControl, timer:Move, minimapElement%A_Index%, % xy
+}
+
+if (map == "Map11")
+    for k,v in liveEvents.Events
+    {
+        if (toggle1 == True) && (v.DragonType == "Elder") && (liveStats.gameTime <= v.EventTime + buffs.elder)
+        {
+            timeDic.a := floor(v.EventTime + buffs.elder - liveStats.gameTime)
+            toggle1 := "toggle1"
+        }
+        if (toggle2 == True) && (v.EventName == "BaronKill") && (liveStats.gameTime <= v.EventTime + buffs.baron)
+        {
+            timeDic.b := floor(v.EventTime + buffs.baron - liveStats.gameTime)
+            toggle2 := "toggle2"  
+        }
+
+        if (v.EventName == "InhibKilled")
+            if (liveStats.gameTime <= v.EventTime + respawnTimer)
+            {
+                loop 6
+                {
+                    index :=  A_Index + 2
+                    letter2 := chr(index + 96)
+                    if (toggle%index% == True) && (v.InhibKilled == inhibList[A_Index])
+                    {
+                        timeDic[letter2] := floor(v.EventTime + respawnTimer - liveStats.gameTime)
+                        toggle%index% := "toggle" index
+                    }  
+                }
+            }
+    }
+else
+    for k,v in liveEvents.Events
+        if (v.EventName == "InhibKilled")
+            if (liveStats.gameTime <= v.EventTime + respawnTimer)
+            {
+                loop 2
+                {
+                    index :=  A_Index * 3 + 1
+                    letter2 := chr(index + 96)
+                    if (toggle%index% == True) && (v.InhibKilled == inhibList[index - 2])
+                    {
+                        timeDic[letter2] := floor(v.EventTime + respawnTimer - liveStats.gameTime)
+                        toggle%index% := "toggle" index
+                    }  
+                }
+            }
+return
+
+
+
+oneSec:
+
+loop 8
+{
+    if (toggle%A_Index% != True)
+    {
+        letter := chr(A_Index + 96)
+        toggle%A_Index% := timeEdit(toggle%A_Index%, letter, timeDic[letter], A_Index)
+    }
+}        
 return
 
 ExitSub:

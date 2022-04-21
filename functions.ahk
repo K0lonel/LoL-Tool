@@ -1,4 +1,6 @@
-﻿APICall(method, site, request := "", j := True)
+﻿#Include <ExploreObj>
+
+APICall(method, site, request := "", j := True)
 {
     static
     req.Open(method, site, False)
@@ -110,4 +112,39 @@ TransSplashText_Off()
     TransSplashText := ""
     Gui, 99:Destroy
     return
+}
+
+detectRG()
+{
+    IniRead, OutputVar, data.ini, Riot Games Path, path
+    if (OutputVar != "ERROR")
+        return OutputVar
+    if FileExist("C:\Riot Games")
+        path := "C:\Riot Games"
+    else if FileExist("D:\Riot Games")
+        path := "D:\Riot Games" 
+    else if FileExist("E:\Riot Games")
+        path := "E:\Riot Games"
+    else
+        FileSelectFolder, path,,0, Select the Riot Games folder.
+    path := path "\League of Legends\Config\PersistedSettings.json"
+    IniWrite, % path, data.ini, Riot Games Path, path
+    return path
+}
+
+timeEdit(toggleNam, timeDictionaryKey, timeDictionaryValue, index)
+{
+    GuiControl, timer:, minimapElement%index%, % timeDic[timeDictionaryKey] -= 1
+    if (timeDictionaryValue <= 0)
+    {
+        GuiControl, timer:, minimapElement%index%, 
+        return True
+    }  
+    return toggleNam
+}
+
+timeEditSetter(timeDictionaryKey, eventTime, respawnTimer, gameTime, index)
+{
+    timeDic.timeDictionaryKey := floor(eventTime + respawnTimer - gameTime)
+    return "toggle" index
 }
