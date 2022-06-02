@@ -7,11 +7,6 @@ if !A_IsAdmin && !%False%
         ExitApp
 }
 
-for n, param in A_Args
-{
-    MsgBox Parameter number %n% is %param%.
-}
-
 if !ProcessExist("RiotClientServices.exe")
     goto isLeague
 else
@@ -55,7 +50,7 @@ arrayAscii := {}
 champNameId := {}
 buttonState := {"ON": "Bench ✔️", "OFF": "Bench ❌"}
 assetsDisplay := "Loading Assets"
-recountModule := "                 RECOUNT - DAMAGE                 "
+recountModule := "                  RECOUNT - DAMAGE                  "
 buffs := {"elder": 150, "baron": 180, "inhiSR": 300, "inhiARAM": 250}
 tftCreate = {"queueId": 1110}
 lobCreate = {"customGameLobby": {"configuration": {"gameMode": "PRACTICETOOL", "gameTypeConfig": {"id": 1}, "mapId": 11, "teamSize": 5}, "lobbyName": "W E L L"}, "isCustom": true}

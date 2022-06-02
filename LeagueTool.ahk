@@ -8,7 +8,7 @@ CoordMode Mouse, Relative
 SetWorkingDir %A_ScriptDir%
 FileEncoding UTF-8
 
-#include, <JSON>
+#include, <JSONcoco>
 #Include, <JSONFile>
 #include, initialize.ahk
 #include, endpoints.ahk
@@ -503,6 +503,7 @@ return
 refresher:
 liveEvents := APICall("GET", eventData)
 liveStats  := APICall("GET", statsData)
+
 
 jf := new JSONFile(path)
 for k, v in jf.Object().files[1].sections
