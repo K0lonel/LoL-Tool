@@ -752,10 +752,7 @@ else
             }
 return
 
-
-
 oneSec:
-
 loop 8
 {
     if (toggle%A_Index% != True)
