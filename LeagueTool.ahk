@@ -9,7 +9,7 @@ SetWorkingDir %A_ScriptDir%
 FileEncoding UTF-8
 
 #Include, JSONcoco.ahk
-; #Include, <JSONFile>
+#Include, JSONFile.ahk
 #Include, hook.ahk
 #Include, endpoints.ahk
 #include, functions.ahk
