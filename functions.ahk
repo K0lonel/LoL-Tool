@@ -99,8 +99,9 @@ getDDragon(url)
 
 TransSplashText_On(Text="",Font="",TC="White", TS = "20", xPos = "center", yPos = "center")
 {
+
     Gui, 99:Font, S%TS% C%TC%, %Font%
-    Gui, 99:Add, Text, x10 y10 BackgroundTrans, %Text%
+    Gui, 99:Add, Text, x10 y10 Center BackgroundTrans, %Text%
     Gui, 99:Color, 1a1a1a
     Gui, 99:+LastFound +AlwaysOnTop +ToolWindow
     WinSet, TransColor, 1a1a1a
