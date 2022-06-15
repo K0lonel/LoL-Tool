@@ -8,8 +8,8 @@ CoordMode Mouse, Relative
 SetWorkingDir %A_ScriptDir%
 FileEncoding UTF-8
 
-#Include, <JSONcoco>
-#Include, <JSONFile>
+#Include, JSONcoco.ahk
+; #Include, <JSONFile>
 #Include, hook.ahk
 #Include, endpoints.ahk
 #include, functions.ahk
