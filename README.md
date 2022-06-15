@@ -1,0 +1,1 @@
+Compile LeagueTool.ahk with icon from "res" folder
